@@ -8,6 +8,12 @@ Claude Code's long-running tasks create dead time. Most of us fill it by scrolli
 
 Requires Python 3.8+. macOS and Linux.
 
+Paste this into any Claude Code session and it'll set the hooks up globally for every future session:
+
+> Install claude-code-break for all my Claude Code sessions. If `~/claude-code-break` doesn't exist, clone `https://github.com/himanshusaleria/claude-code-break` into it and `chmod +x mover.py`. Then merge — don't overwrite — `Notification` and `Stop` hooks into `~/.claude/settings.json` that each run `~/claude-code-break/mover.py prompt`. Verify by running `echo '{}' | ~/claude-code-break/mover.py prompt` and confirm a notification fires.
+
+### Manual install
+
 ```bash
 git clone https://github.com/himanshusaleria/claude-code-break.git ~/claude-code-break
 chmod +x ~/claude-code-break/mover.py
@@ -29,12 +35,6 @@ Add the hooks to `~/.claude/settings.json` (a copy is in `settings.example.json`
 ```
 
 Restart Claude Code. Verify with `echo '{}' | ~/claude-code-break/mover.py prompt`.
-
-### Install via a Claude Code prompt
-
-Paste this into any Claude Code session and it'll set the hooks up globally for every future session:
-
-> Install claude-code-break for all my Claude Code sessions. If `~/claude-code-break` doesn't exist, clone `https://github.com/himanshusaleria/claude-code-break` into it and `chmod +x mover.py`. Then merge — don't overwrite — `Notification` and `Stop` hooks into `~/.claude/settings.json` that each run `~/claude-code-break/mover.py prompt`. Verify by running `echo '{}' | ~/claude-code-break/mover.py prompt` and confirm a notification fires.
 
 ## How it works
 
