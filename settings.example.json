@@ -1,0 +1,25 @@
+{
+  "_comment": "Paste these hook entries into ~/.claude/settings.json (or .claude/settings.json in your project). Replace the absolute path with where you cloned claude-code-break.",
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/ABSOLUTE/PATH/TO/claude-code-break/mover.py prompt"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/ABSOLUTE/PATH/TO/claude-code-break/mover.py prompt"
+          }
+        ]
+      }
+    ]
+  }
+}
