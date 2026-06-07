@@ -14,7 +14,7 @@
     "tts": false
   },
   "notification_title": "Movement Break",
-  "notification_sound": "Glass",
+  "notification_sound": "",
   "trigger_events": ["Notification", "Stop"],
   "_comment": "trigger_events: which Claude Code hook events fire a prompt. 'Notification' = idle/waiting. 'Stop' = assistant finished. 'PreToolUse' = every tool call (uses cooldown). Use 'Notification' only for the calmest default. notification_sound: macOS name from /System/Library/Sounds (Basso, Blow, Bottle, Frog, Funk, Glass, Hero, Morse, Ping, Pop, Purr, Sosumi, Submarine, Tink) or absolute path to a sound file on Linux. Empty string disables sound."
 }

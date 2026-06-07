@@ -55,7 +55,7 @@ Edit `config.json`:
 | `cooldown_seconds` | Min gap between any prompts. Default 90s. |
 | `daily_cap_active` | Max active exercises per day. Default 40. |
 | `hydration_interval_seconds` | Min gap between hydration prompts. Default 7200 (2h). Hydration overrides the random pick when due. |
-| `notification_sound` | macOS: name from `/System/Library/Sounds` (Glass, Ping, Hero…). Linux: absolute path to a sound file. Empty string disables. Default `Glass`. |
+| `notification_sound` | macOS: name from `/System/Library/Sounds` (Glass, Ping, Hero…). Linux: absolute path to a sound file. Empty string (default) is silent. |
 | `channels.notification` | OS notification. Default on. |
 | `channels.terminal` | Print to stdout. Default on. |
 | `channels.tts` | Speak the suggestion aloud (`say` on Mac, `espeak`/`spd-say` on Linux). Default off. |
