@@ -4,8 +4,12 @@
     "light": 0.3,
     "active": 0.1
   },
-  "cooldown_seconds": 90,
-  "daily_cap_active": 40,
+  "cooldown_seconds": 600,
+  "daily_cap_active": 8,
+  "tier_cooldown_seconds": {
+    "light": 1200,
+    "active": 2700
+  },
   "hydration_interval_seconds": 7200,
   "hydration_title": "Hydration Break",
   "channels": {

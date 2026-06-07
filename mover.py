@@ -78,16 +78,20 @@ def pick_intensity(weights: dict) -> str:
     return random.choices(population, weights=probs, k=1)[0]
 
 
-def pick_exercise(config: dict, state: dict, exercises: dict) -> tuple[str, str]:
-    """Returns (intensity, exercise_text). Avoids repeating the last exercise.
+def pick_exercise(config: dict, state: dict, exercises: dict) -> tuple[str, str] | None:
+    """Returns (intensity, exercise_text), or None if every tier is on cooldown.
 
     Hydration fires on its own slow cadence and overrides the random pick when due.
+    Per-tier cooldowns spread out active/light prompts so a 2h session lands ~2-3
+    active sets instead of a constant stream.
     """
+    now = time.time()
+
     hydration_pool = list(exercises.get("hydration", []))
     if hydration_pool:
         interval = int(config.get("hydration_interval_seconds", 7200))
         last_at = float(state.get("last_hydration_at", 0))
-        if (time.time() - last_at) >= interval:
+        if (now - last_at) >= interval:
             last = state.get("last_exercise")
             if last in hydration_pool and len(hydration_pool) > 1:
                 hydration_pool.remove(last)
@@ -100,10 +104,20 @@ def pick_exercise(config: dict, state: dict, exercises: dict) -> tuple[str, str]
     if daily.get("date") != today:
         daily = {"date": today, "active_count": 0, "total_count": 0}
 
-    if daily["active_count"] >= int(config.get("daily_cap_active", 40)):
+    if daily["active_count"] >= int(config.get("daily_cap_active", 8)):
         weights.pop("active", None)
-        if not weights:
-            weights = {"micro": 1.0}
+
+    tier_cooldowns = config.get("tier_cooldown_seconds", {}) or {}
+    last_tier_at = state.get("last_tier_at", {}) or {}
+    for tier in list(weights.keys()):
+        cd = int(tier_cooldowns.get(tier, 0))
+        if cd <= 0:
+            continue
+        if (now - float(last_tier_at.get(tier, 0))) < cd:
+            weights.pop(tier, None)
+
+    if not weights:
+        return None
 
     last = state.get("last_exercise")
     for _ in range(8):
@@ -113,8 +127,7 @@ def pick_exercise(config: dict, state: dict, exercises: dict) -> tuple[str, str]
             pool.remove(last)
         if not pool:
             continue
-        choice = random.choice(pool)
-        return intensity, choice
+        return intensity, random.choice(pool)
     return "micro", "Take three slow deep breaths"
 
 
@@ -187,7 +200,10 @@ def cmd_prompt(payload: dict) -> int:
     if hook_event != "manual" and (now - last_at) < cooldown:
         return 0
 
-    intensity, exercise = pick_exercise(config, state, exercises)
+    picked = pick_exercise(config, state, exercises)
+    if picked is None:
+        return 0
+    intensity, exercise = picked
 
     if intensity == "hydration":
         title = config.get("hydration_title", "Hydration Break")
@@ -216,6 +232,9 @@ def cmd_prompt(payload: dict) -> int:
     state["last_prompt_at"] = now
     if intensity == "hydration":
         state["last_hydration_at"] = now
+    last_tier_at = state.get("last_tier_at", {}) or {}
+    last_tier_at[intensity] = now
+    state["last_tier_at"] = last_tier_at
     state["daily"] = daily
     save_state(state)
 

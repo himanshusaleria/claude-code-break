@@ -52,8 +52,9 @@ Edit `config.json`:
 | Key | Meaning |
 |-----|---------|
 | `intensity_weights` | Probability of each movement tier. Default: 60% micro, 30% light, 10% active. |
-| `cooldown_seconds` | Min gap between any prompts. Default 90s. |
-| `daily_cap_active` | Max active exercises per day. Default 40. |
+| `cooldown_seconds` | Min gap between any prompts. Default 600 (10 min). |
+| `tier_cooldown_seconds` | Per-tier minimum gap, on top of the global cooldown. Default: `light` 1200 (20 min), `active` 2700 (45 min). Tiers on cooldown are silently skipped. |
+| `daily_cap_active` | Max active exercises per day. Default 8. |
 | `hydration_interval_seconds` | Min gap between hydration prompts. Default 7200 (2h). Hydration overrides the random pick when due. |
 | `notification_sound` | macOS: name from `/System/Library/Sounds` (Glass, Ping, Hero…). Linux: absolute path to a sound file. Empty string (default) is silent. |
 | `channels.notification` | OS notification. Default on. |
