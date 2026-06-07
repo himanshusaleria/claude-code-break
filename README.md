@@ -1,64 +1,49 @@
 # claude-code-break
 
-> Tiny movement nudges during the windows when Claude Code is working or waiting on you.
+> Tiny movement + hydration nudges during the windows when Claude Code is working or waiting on you.
 
-Claude Code's long-running tasks create dead time. Most of us fill it by scrolling. `claude-code-break` hooks into Claude Code's lifecycle and pushes a short suggestion to your screen instead — "roll your neck," "5 pushups," "look 20 feet away" — exactly when you're tempted to grab your phone.
-
-When Claude Code finishes, the prompt is done. No timers. No app to open. No habit to maintain.
-
-## How it works
-
-`claude-code-break` is a single Python script wired to two Claude Code hooks:
-
-- **`Notification`** — fires when Claude Code is idle or waiting on you (permission prompt, idle prompt). The classic "don't reach for your phone" moment.
-- **`Stop`** — fires when Claude Code finishes a turn. Catches the end-of-task pause.
-
-On each event the script picks an exercise, respects a cooldown so you aren't spammed, and emits the suggestion via native notification + terminal print. State and history live in `~/.movement-break/`.
+Claude Code's long-running tasks create dead time. Most of us fill it by scrolling. `claude-code-break` hooks into Claude Code's lifecycle and pushes a short suggestion to your screen instead — "roll your neck," "5 pushups," "drink a glass of water" — exactly when you're tempted to grab your phone.
 
 ## Install
 
-Requires Python 3.8+. macOS and Linux supported.
+Requires Python 3.8+. macOS and Linux.
 
 ```bash
 git clone https://github.com/himanshusaleria/claude-code-break.git ~/claude-code-break
 chmod +x ~/claude-code-break/mover.py
 ```
 
-Then add the hooks to `~/.claude/settings.json` (create the file if it doesn't exist):
+Add the hooks to `~/.claude/settings.json` (a copy is in `settings.example.json`):
 
 ```json
 {
   "hooks": {
     "Notification": [
-      {
-        "hooks": [
-          { "type": "command", "command": "/Users/YOU/claude-code-break/mover.py prompt" }
-        ]
-      }
+      { "hooks": [{ "type": "command", "command": "~/claude-code-break/mover.py prompt" }] }
     ],
     "Stop": [
-      {
-        "hooks": [
-          { "type": "command", "command": "/Users/YOU/claude-code-break/mover.py prompt" }
-        ]
-      }
+      { "hooks": [{ "type": "command", "command": "~/claude-code-break/mover.py prompt" }] }
     ]
   }
 }
 ```
 
-Replace the path with the absolute path to your `mover.py`. Restart Claude Code. Next time it goes idle, you'll get a nudge.
+Restart Claude Code. Verify with `echo '{}' | ~/claude-code-break/mover.py prompt`.
 
-A copy of this snippet is in `settings.example.json`.
+### Install via a Claude Code prompt
 
-## Test it before wiring
+Paste this into any Claude Code session and it'll set the hooks up globally for every future session:
 
-```bash
-echo '{}' | ./mover.py prompt
-./mover.py stats
-```
+> Install claude-code-break for all my Claude Code sessions. If `~/claude-code-break` doesn't exist, clone `https://github.com/himanshusaleria/claude-code-break` into it and `chmod +x mover.py`. Then merge — don't overwrite — `Notification` and `Stop` hooks into `~/.claude/settings.json` that each run `~/claude-code-break/mover.py prompt`. Verify by running `echo '{}' | ~/claude-code-break/mover.py prompt` and confirm a notification fires.
 
-You should see a notification appear and a line in the terminal.
+## How it works
+
+Two hooks fire the script:
+
+- **`Notification`** — Claude Code is idle or waiting on you (permission/idle prompt).
+- **`Stop`** — Claude Code finished a turn.
+
+The script picks a movement or hydration prompt, respects a cooldown so you aren't spammed, and emits the suggestion via native notification (with sound) + terminal. State and history live in `~/.movement-break/`.
 
 ## Configure
 
@@ -66,41 +51,34 @@ Edit `config.json`:
 
 | Key | Meaning |
 |-----|---------|
-| `intensity_weights` | Probability of each tier. Default: 60% micro, 30% light, 10% active. Adjust to taste. |
-| `cooldown_seconds` | Minimum gap between prompts. Default 90s — prevents spam during rapid tool calls. |
-| `daily_cap_active` | Max active exercises per day (e.g. pushups). After the cap, active tier is skipped. Default 40. |
-| `channels.notification` | OS notification (osascript on Mac, notify-send on Linux). Default on. |
-| `channels.terminal` | Print the suggestion to stdout. Default on. |
+| `intensity_weights` | Probability of each movement tier. Default: 60% micro, 30% light, 10% active. |
+| `cooldown_seconds` | Min gap between any prompts. Default 90s. |
+| `daily_cap_active` | Max active exercises per day. Default 40. |
+| `hydration_interval_seconds` | Min gap between hydration prompts. Default 7200 (2h). Hydration overrides the random pick when due. |
+| `notification_sound` | macOS: name from `/System/Library/Sounds` (Glass, Ping, Hero…). Linux: absolute path to a sound file. Empty string disables. Default `Glass`. |
+| `channels.notification` | OS notification. Default on. |
+| `channels.terminal` | Print to stdout. Default on. |
 | `channels.tts` | Speak the suggestion aloud (`say` on Mac, `espeak`/`spd-say` on Linux). Default off. |
-| `trigger_events` | Which Claude Code hook events fire a prompt. Default `["Notification", "Stop"]`. Add `"PreToolUse"` if you want a nudge on every tool call (cooldown still applies). |
+| `trigger_events` | Which Claude Code events fire a prompt. Default `["Notification", "Stop"]`. Add `"PreToolUse"` for nudges on every tool call (cooldown still applies). |
 
-## The exercise pool
+## Exercise pool
 
-`exercises.json` ships with 24 exercises in three tiers:
+`exercises.json` ships with four tiers — edit the JSON to add your own:
 
-- **micro** (~10s, always safe): breathing, neck rolls, jaw unclench, eye rest, posture resets
-- **light** (~20–30s): shoulder rolls, wrist stretches, calf raises, spinal twists, forward folds
-- **active** (~30–60s): 1 pushup, 5 pushups, 10 squats, 30s wall sit, plank
+- **micro** (~10s, always safe): breathing, neck rolls, jaw, eye rest, posture
+- **light** (~20–30s): shoulder rolls, calf raises, short walks, stretches
+- **active** (~30–60s): pushups, squats, plank, brisk walks, stairs
+- **hydration** (every ~2h): drink water, refill bottle
 
-Add your own — just edit the JSON. Pick whatever tier fits the intensity.
+## Stats
 
-## Stats and history
-
-Every prompt is logged to `~/.movement-break/log.jsonl` (one JSON object per line). Run `mover.py stats` to see today's tally:
-
-```text
-Today (2026-06-07): 12 prompts, 2 active.
-Last: [micro] Drop your shoulders away from your ears
-```
-
-Pipe the log through `jq` if you want a weekly breakdown.
+Every prompt is logged to `~/.movement-break/log.jsonl` (one JSON per line). Run `mover.py stats` for today's tally. Pipe through `jq` for weekly breakdowns.
 
 ## Troubleshooting
 
-- **No notification on macOS?** First run will prompt for notification permission for `osascript` or your Terminal app. Allow it.
-- **Notification but no terminal print?** The hook's stdout doesn't always surface inside Claude Code's UI. That's fine — the notification is the primary channel.
-- **Getting nudged too often?** Bump `cooldown_seconds` to 180 or 300. Or set `trigger_events` to `["Stop"]` only.
-- **Want the prompt spoken aloud?** Set `channels.tts` to `true` in `config.json`. Mac uses the system `say` command; Linux needs `espeak` or `spd-say` installed.
+- **No notification on macOS?** First run prompts for notification permission for `osascript`/Terminal. Allow it.
+- **Too frequent?** Bump `cooldown_seconds` to 180–300, or set `trigger_events` to `["Stop"]` only.
+- **No terminal print inside Claude Code's UI?** Expected — the hook's stdout doesn't always surface. The notification is the primary channel.
 
 ## License
 

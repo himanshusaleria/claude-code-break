@@ -7,7 +7,12 @@
     "Look at something 20 feet away for 20 seconds",
     "Drop your shoulders away from your ears",
     "Soften your eyes — blink slowly five times",
-    "Press your tongue to the roof of your mouth, relax"
+    "Press your tongue to the roof of your mouth, relax",
+    "Stand up — just stand for 10 seconds",
+    "Close your eyes and rest them for 30 seconds",
+    "Look at the furthest thing you can see — count to 20",
+    "Palm your eyes — cup hands over closed eyes for 20 seconds",
+    "Take off your glasses and gently massage your temples"
   ],
   "light": [
     "Shoulder rolls — 5 forward, 5 back",
@@ -17,7 +22,10 @@
     "Twist your spine left, then right — slow",
     "Cat-cow on the floor — 5 reps",
     "Stand up and reach for the ceiling — hold 10s",
-    "Forward fold — let your head hang for 15 seconds"
+    "Forward fold — let your head hang for 15 seconds",
+    "Stand and shake out your hands and feet — 20 seconds",
+    "Walk to the nearest window and look outside",
+    "Walk to another room and back"
   ],
   "active": [
     "1 pushup",
@@ -27,6 +35,14 @@
     "10 squats",
     "30 second wall sit",
     "10 jumping jacks",
-    "20 second plank"
+    "20 second plank",
+    "Walk briskly for 60 seconds",
+    "Take the stairs — up and down once"
+  ],
+  "hydration": [
+    "Drink a full glass of water",
+    "Refill your water bottle",
+    "Sip water — at least half a glass",
+    "Drink water, then stretch your arms overhead"
   ]
 }

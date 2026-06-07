@@ -79,7 +79,20 @@ def pick_intensity(weights: dict) -> str:
 
 
 def pick_exercise(config: dict, state: dict, exercises: dict) -> tuple[str, str]:
-    """Returns (intensity, exercise_text). Avoids repeating the last exercise."""
+    """Returns (intensity, exercise_text). Avoids repeating the last exercise.
+
+    Hydration fires on its own slow cadence and overrides the random pick when due.
+    """
+    hydration_pool = list(exercises.get("hydration", []))
+    if hydration_pool:
+        interval = int(config.get("hydration_interval_seconds", 7200))
+        last_at = float(state.get("last_hydration_at", 0))
+        if (time.time() - last_at) >= interval:
+            last = state.get("last_exercise")
+            if last in hydration_pool and len(hydration_pool) > 1:
+                hydration_pool.remove(last)
+            return "hydration", random.choice(hydration_pool)
+
     weights = dict(config.get("intensity_weights", {"micro": 0.6, "light": 0.3, "active": 0.1}))
 
     today = date.today().isoformat()
@@ -110,25 +123,34 @@ def _applescript_quote(text: str) -> str:
     return f'"{escaped}"'
 
 
-def notify_macos(title: str, message: str) -> None:
+def notify_macos(title: str, message: str, sound: str | None = None) -> None:
     script = (
         f'display notification {_applescript_quote(message)} '
         f'with title {_applescript_quote(title)}'
     )
+    if sound:
+        script += f' sound name {_applescript_quote(sound)}'
     subprocess.run(["osascript", "-e", script], check=False)
 
 
-def notify_linux(title: str, message: str) -> None:
+def notify_linux(title: str, message: str, sound: str | None = None) -> None:
     subprocess.run(["notify-send", title, message], check=False)
+    if sound:
+        for cmd in (["paplay", sound], ["aplay", sound], ["play", sound]):
+            try:
+                subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                return
+            except FileNotFoundError:
+                continue
 
 
-def emit_notification(title: str, message: str) -> None:
+def emit_notification(title: str, message: str, sound: str | None = None) -> None:
     system = platform.system()
     try:
         if system == "Darwin":
-            notify_macos(title, message)
+            notify_macos(title, message, sound)
         elif system == "Linux":
-            notify_linux(title, message)
+            notify_linux(title, message, sound)
     except FileNotFoundError:
         pass
 
@@ -167,10 +189,14 @@ def cmd_prompt(payload: dict) -> int:
 
     intensity, exercise = pick_exercise(config, state, exercises)
 
-    title = config.get("notification_title", "Movement Break")
+    if intensity == "hydration":
+        title = config.get("hydration_title", "Hydration Break")
+    else:
+        title = config.get("notification_title", "Movement Break")
     channels = config.get("channels", {})
     if channels.get("notification", True):
-        emit_notification(title, exercise)
+        sound = config.get("notification_sound") or None
+        emit_notification(title, exercise, sound)
     if channels.get("terminal", True):
         sys.stdout.write(f"\n[movement-break] {intensity}: {exercise}\n")
         sys.stdout.flush()
@@ -188,6 +214,8 @@ def cmd_prompt(payload: dict) -> int:
     state["last_exercise"] = exercise
     state["last_intensity"] = intensity
     state["last_prompt_at"] = now
+    if intensity == "hydration":
+        state["last_hydration_at"] = now
     state["daily"] = daily
     save_state(state)
 
