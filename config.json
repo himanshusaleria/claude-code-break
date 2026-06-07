@@ -13,7 +13,7 @@
   "hydration_interval_seconds": 7200,
   "hydration_title": "Hydration Break",
   "channels": {
-    "notification": true,
+    "notification": false,
     "terminal": true,
     "tts": false
   },

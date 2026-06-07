@@ -26,6 +26,10 @@ STATE_DIR = Path(os.environ.get("MOVEMENT_BREAK_HOME", Path.home() / ".movement-
 STATE_FILE = STATE_DIR / "state.json"
 LOG_FILE = STATE_DIR / "log.jsonl"
 
+# ANSI foreground codes the status line cycles through so the user sees the
+# break text change color each time a new prompt is picked.
+COLOR_CODES = [31, 32, 33, 34, 35, 36, 91, 92, 93, 94, 95, 96]
+
 
 def load_json(path: Path, default):
     try:
@@ -235,6 +239,9 @@ def cmd_prompt(payload: dict) -> int:
     last_tier_at = state.get("last_tier_at", {}) or {}
     last_tier_at[intensity] = now
     state["last_tier_at"] = last_tier_at
+    prev_color = state.get("last_color")
+    color_choices = [c for c in COLOR_CODES if c != prev_color] or COLOR_CODES
+    state["last_color"] = random.choice(color_choices)
     state["daily"] = daily
     save_state(state)
 
