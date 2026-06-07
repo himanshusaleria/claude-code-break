@@ -10,7 +10,9 @@ Requires Python 3.8+. macOS and Linux.
 
 Paste this into any Claude Code session and it'll set the hooks up globally for every future session:
 
-> Install claude-code-break for all my Claude Code sessions. If `~/claude-code-break` doesn't exist, clone `https://github.com/himanshusaleria/claude-code-break` into it and `chmod +x mover.py`. Then merge — don't overwrite — `Notification` and `Stop` hooks into `~/.claude/settings.json` that each run `~/claude-code-break/mover.py prompt`. Verify by running `echo '{}' | ~/claude-code-break/mover.py prompt` and confirm a notification fires.
+```
+Install claude-code-break for all my Claude Code sessions. If ~/claude-code-break doesn't exist, clone https://github.com/himanshusaleria/claude-code-break into it and chmod +x mover.py. Then merge — don't overwrite — Notification and Stop hooks into ~/.claude/settings.json that each run ~/claude-code-break/mover.py prompt. Verify by running `echo '{}' | ~/claude-code-break/mover.py prompt` and confirm a notification fires.
+```
 
 ### Manual install
 
